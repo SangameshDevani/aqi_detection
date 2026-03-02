@@ -240,6 +240,7 @@ function updateResult(data) {
         alert("Location access denied.");
       });
     }
+    updateChart(data.aqi, color);
 }
 
 let map;
@@ -271,4 +272,59 @@ function initMap(lat, lng, aqi, color) {
     }).addTo(map);
 
     marker.bindPopup(`AQI: ${aqi}`).openPopup();
+}
+let chart;
+let aqiHistory = [];
+let labels = [];
+
+function updateChart(aqi, color) {
+
+    document.getElementById("chartSection").style.display = "block";
+
+    const now = new Date();
+    const timeLabel = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+
+    aqiHistory.push(aqi);
+    labels.push(timeLabel);
+
+    if (!chart) {
+
+        const ctx = document.getElementById("aqiChart").getContext("2d");
+
+        chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "AQI Trend",
+                    data: aqiHistory,
+                    borderColor: color,
+                    backgroundColor: color + "33",
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointBackgroundColor: color
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 500
+                    }
+                }
+            }
+        });
+
+    } else {
+
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = aqiHistory;
+        chart.data.datasets[0].borderColor = color;
+        chart.data.datasets[0].backgroundColor = color + "33";
+        chart.data.datasets[0].pointBackgroundColor = color;
+
+        chart.update();
+    }
 }
