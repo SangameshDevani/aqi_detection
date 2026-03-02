@@ -226,4 +226,49 @@ function updateResult(data) {
     // 🔥 CONFIDENCE (FIXED)
     document.getElementById("confidence").innerText =
         "Model Confidence: " + data.confidence + "%";
+
+        // 🌍 Get GPS Location
+    if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(position => {
+
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        initMap(lat, lng, data.aqi, color);
+
+      }, () => {
+        alert("Location access denied.");
+      });
+    }
+}
+
+let map;
+let marker;
+
+function initMap(lat, lng, aqi, color) {
+
+    document.getElementById("mapSection").style.display = "block";
+
+    if (!map) {
+        map = L.map('map').setView([lat, lng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    }
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    marker = L.circleMarker([lat, lng], {
+        radius: 15,
+        fillColor: color,
+        color: "#ffffff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+    }).addTo(map);
+
+    marker.bindPopup(`AQI: ${aqi}`).openPopup();
 }
